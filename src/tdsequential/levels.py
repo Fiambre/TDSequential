@@ -6,32 +6,39 @@ def calculate_tdst_levels(df, high_col='High', low_col='Low') -> pd.DataFrame:
     Calcula niveles TDST (Tom DeMark Support/Resistance) tras completar un Setup.
 
     Reglas:
-    - Tras un Buy Setup (9), se traza un nivel de resistencia (TDST) = máximo entre las velas 1 a 9.
-    - Tras un Sell Setup (9), se traza un nivel de soporte (TDST) = mínimo entre las velas 1 a 9.
-    - El nivel se mantiene activo hasta que el precio lo rompe (por debajo en Buy, por encima en Sell).
+    - Tras un Buy Setup (9), se traza un nivel (TDST Buy) = máximo entre las velas 1 a 9 del setup.
+    - Tras un Sell Setup (9), se traza un nivel (TDST Sell) = mínimo entre las velas 1 a 9 del setup.
+    - El nivel se mantiene activo hasta que el precio lo rompe:
+        - Buy TDST se invalida si Low < TDST Buy
+        - Sell TDST se invalida si High > TDST Sell
 
-    Requiere que el DataFrame tenga las columnas:
-      - 'buy_setup_count' con valores de 1 a 9 para los buy setups
-      - 'sell_setup_count' con valores de 1 a 9 para los sell setups
-
-    Parámetros:
-    - df: DataFrame con las columnas de conteo de setups.
-    - high_col: nombre de la columna de máximos (default: 'High').
-    - low_col: nombre de la columna de mínimos (default: 'Low').
+    Requiere columnas:
+      - 'buy_setup_count' (1..9)
+      - 'sell_setup_count' (1..9)
 
     Retorna:
-    - DataFrame con dos nuevas columnas:
-        - 'tdst_buy': nivel TDST tras cada buy setup
-        - 'tdst_sell': nivel TDST tras cada sell setup
+    - El DataFrame original con dos nuevas columnas:
+        - 'tdst_buy'
+        - 'tdst_sell'
     """
     df = df.copy()
-    df['tdst_buy'] = np.nan
-    df['tdst_sell'] = np.nan
+
+    # Crear columnas si no existen
+    if 'tdst_buy' not in df.columns:
+        df['tdst_buy'] = np.nan
+    else:
+        df['tdst_buy'] = np.nan
+
+    if 'tdst_sell' not in df.columns:
+        df['tdst_sell'] = np.nan
+    else:
+        df['tdst_sell'] = np.nan
 
     active_buy_tdst = None
     active_sell_tdst = None
 
-    for i in range(len(df)):
+    n = len(df)
+    for i in range(n):
         # Detectar fin de Buy Setup (vela 9)
         if i >= 8 and df.loc[i, 'buy_setup_count'] == 9:
             active_buy_tdst = df.loc[i - 8:i, high_col].max()
@@ -51,4 +58,4 @@ def calculate_tdst_levels(df, high_col='High', low_col='Low') -> pd.DataFrame:
         if active_sell_tdst is not None and df.loc[i, high_col] > active_sell_tdst:
             active_sell_tdst = None
 
-    return df[['tdst_buy', 'tdst_sell']]
+    return df
