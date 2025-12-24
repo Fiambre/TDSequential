@@ -1,0 +1,20 @@
+[project]
+name = "tdsequential"
+version = "0.1.0"
+description = "Librería Python para calcular el indicador TD Sequential y Countdown de Tom DeMark"
+authors = [
+    { name = "Tu Nombre", email = "tu.email@ejemplo.com" }
+]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+keywords = ["TD Sequential", "Tom DeMark", "indicador", "trading", "análisis técnico"]
+dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
